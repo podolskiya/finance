@@ -1,0 +1,42 @@
+# Data Import
+
+import riskfolio as rp
+import pandas as pd
+import yfinance as yf
+import seaborn as sns
+import pyfolio as pf
+
+assets = {
+    "NVDA",
+    "PANW",
+    "AAPL",
+    "MSFT",
+    "GOOG",
+    "TSLA",
+    "DIS",
+    "AXP",
+    "GLD",
+    "^GSPC",
+}
+
+data = yf.download(assets, start="2018-01-01", end="2026-01-01")
+data = data.loc[:, "Adj Close"]
+data
+
+# Returns
+returns = data.pct_change().dropna()
+returns
+
+returns.median().sort_values(ascending=False).to_frame (name="median_return")
+
+# Cluster correlations
+rp.plot_clusers(
+    returns=returns,
+    codependence="pearson",
+    linkage="ward",
+    k=None,
+    max_k=10,
+    leaf_order=True,
+    dendogram=True,
+    ax=None
+)

@@ -1,2 +1,2 @@
 # finance
-Various finance-related codes
+Various finance-related codes and models.

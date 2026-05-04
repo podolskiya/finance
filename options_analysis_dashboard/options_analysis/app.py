@@ -3,14 +3,17 @@ import streamlit as st
 
 from models.black_scholes import black_scholes_price
 from models.binomial_tree import binomial_tree_price
+from models.iv_solver import implied_volatility
 from models.monte_carlo import monte_carlo_price
+from models.vol_smile import compute_vol_smile
+from utils.market_data import get_spot_and_hist_vol, get_option_chain
+from models.exotic_options import asian_option_price, barrier_option_price
 from greeks.greeks import (
     greeks_vs_spot, greeks_vs_vol, greeks_vs_time,
     delta, gamma, vega, theta, rho,
 )
 from utils.plotting import (
-    pricing_bar_chart, mc_paths_chart,
-    greeks_subplots, greek_surface_3d,
+    pricing_bar_chart, pnl_heatmap, mc_paths_chart, greeks_subplots, greek_surface_3d, vol_smile_chart
 )
 
 st.set_page_config(
@@ -66,6 +69,7 @@ st.sidebar.subheader("Model Settings")
 bt_steps = st.sidebar.number_input("Binomial Tree Steps", min_value=10, max_value=1000, value=200, step=10)
 mc_sims  = st.sidebar.number_input("MC Simulations",     min_value=1000, max_value=100_000, value=10_000, step=1000)
 
+
 st.sidebar.markdown("---")
 st.sidebar.markdown("*Built with Black-Scholes · CRR Binomial Tree · Monte Carlo GBM*")
 
@@ -81,6 +85,27 @@ g_gamma = gamma(S, K, T, r, sigma)
 g_vega  = vega(S, K, T, r, sigma)
 g_theta = theta(S, K, T, r, sigma, option_type)
 g_rho   = rho(S, K, T, r, sigma, option_type)
+
+st.sidebar.subheader("IV Solver")
+market_price_input = st.sidebar.number_input(
+    "Market Option Price (for IV)", min_value=0.01, value=bs_price, step=0.01
+)
+
+iv_result = implied_volatility(market_price_input, S, K, T, r, option_type)
+
+st.subheader("P&L Heatmap")
+S_heat   = np.linspace(S * 0.6, S * 1.4, 40)
+sig_heat = np.linspace(0.05, 0.80, 30)
+st.plotly_chart(
+    pnl_heatmap(S_heat, sig_heat, K, T, r, option_type, premium_paid=bs_price),
+    use_container_width=True
+)
+
+st.metric(
+    "Implied Volatility",
+    f"{iv_result*100:.2f}%" if iv_result else "N/A",
+    help="Solved via Brent's root-finding on Black-Scholes"
+)
 
 st.title("Options Pricing & Greeks Dashboard")
 st.markdown(
@@ -115,6 +140,9 @@ c5.metric("ρ Rho",    f"{g_rho:.4f}",   help="∂Price/∂r (per 1% rate)")
 
 st.markdown("---")
 
+with st.expander("Volatility Smile", expanded=True):
+    strikes, ivs, smile_vols = compute_vol_smile(S, T, r, option_type=option_type)
+    st.plotly_chart(vol_smile_chart(strikes, ivs, smile_vols, S), use_container_width=True)
 
 st.subheader("Greeks Sensitivity Analysis")
 
@@ -134,13 +162,12 @@ with tab1:
     S_range = np.linspace(S_min, S_max, 200)
     g_data = greeks_vs_spot(S_range, K, T, r, sigma, option_type)
     fig = greeks_subplots(S_range, g_data, x_label="Spot Price ($)", selected_greeks=selected_greeks)
-    # Add vertical line for current spot
     for trace in fig.data:
-        pass  # Plotly subplots make vlines tricky; we annotate in layout instead
+        pass  
     st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
-    sigma_range = np.linspace(0.01, 1.0, 200)   # 1% to 100% vol
+    sigma_range = np.linspace(0.01, 1.0, 200) 
     g_data = greeks_vs_vol(S, K, T, r, sigma_range, option_type)
     fig = greeks_subplots(sigma_range * 100, g_data,
                           x_label="Volatility (%)", selected_greeks=selected_greeks)
@@ -226,3 +253,58 @@ fig_conv.update_layout(
     height=400,
 )
 st.plotly_chart(fig_conv, use_container_width=True)
+
+st.subheader("🌐 Exotic Options")
+col_a, col_b = st.columns(2)
+
+with col_a:
+    st.markdown("**Asian (Average Price)**")
+    asian_price, asian_err = asian_option_price(
+        S, K, T, r, sigma, simulations=20_000, option_type=option_type
+    )
+    st.metric("Asian Price", f"${asian_price:.4f}",
+              delta=f"{asian_price - bs_price:+.4f} vs Vanilla",
+              help=f"95% CI ±${1.96*asian_err:.4f}")
+
+with col_b:
+    st.markdown("**Barrier (Down-and-Out)**")
+    barrier_level = st.slider(
+        "Barrier Level", min_value=float(S * 0.5),
+        max_value=float(S * 0.99), value=float(S * 0.85), step=1.0
+    )
+    barrier_price, barrier_err = barrier_option_price(
+        S, K, T, r, sigma, barrier=barrier_level,
+        barrier_type="down-and-out", option_type=option_type
+    )
+    st.metric("Barrier Price", f"${barrier_price:.4f}",
+              delta=f"{barrier_price - bs_price:+.4f} vs Vanilla",
+              help=f"Knocked out below ${barrier_level:.0f}")
+    
+st.sidebar.subheader("📡 Live Market Data")
+use_live = st.sidebar.toggle("Enable Live Data", value=False)
+
+if use_live:
+    ticker = st.sidebar.text_input("Ticker", value="AAPL").upper()
+    try:
+        with st.spinner(f"Fetching {ticker}..."):
+            live_spot, live_vol = get_spot_and_hist_vol(ticker)
+        st.sidebar.success(f"S = ${live_spot:.2f} | HV = {live_vol*100:.1f}%")
+
+        S     = live_spot
+        sigma = live_vol
+
+        if st.sidebar.button("Load Option Chain"):
+            calls_df, puts_df, expiry = get_option_chain(ticker)
+            st.subheader(f"📋 {ticker} Option Chain — {expiry}")
+            tab_c, tab_p = st.tabs(["Calls", "Puts"])
+            with tab_c:
+                st.dataframe(calls_df.style.background_gradient(
+                    subset=["impliedVolatility"], cmap="RdYlGn_r"
+                ), use_container_width=True)
+            with tab_p:
+                st.dataframe(puts_df.style.background_gradient(
+                    subset=["impliedVolatility"], cmap="RdYlGn"
+                ), use_container_width=True)
+
+    except Exception as e:
+        st.sidebar.error(f"Error: {e}")

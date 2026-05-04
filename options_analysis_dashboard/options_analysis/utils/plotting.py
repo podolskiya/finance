@@ -154,3 +154,63 @@ def greek_surface_3d(S_range, T_range, Z_matrix, greek_name):
         height=500,
     )
     return fig
+
+def vol_smile_chart(strikes, ivs, smile_vols, S):
+    import plotly.graph_objects as go
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=list(strikes), y=[v * 100 if v else None for v in ivs],
+        mode="lines+markers",
+        name="Recovered IV (Brent)",
+        line=dict(color="#38BDF8", width=2.5),
+        marker=dict(size=5),
+    ))
+
+    fig.add_vline(x=S, line=dict(color="#FB7185", dash="dash", width=1.5),
+                  annotation_text="ATM", annotation_font_color="#FB7185")
+
+    layout = _base_layout("Volatility Smile — IV vs Strike")
+    layout["xaxis"]["title"] = "Strike Price ($)"
+    layout["yaxis"]["title"] = "Implied Volatility (%)"
+    fig.update_layout(**layout)
+    return fig
+
+def pnl_heatmap(S_range, sigma_range, K, T, r, option_type, premium_paid):
+    import numpy as np
+    from models.black_scholes import black_scholes_price
+
+    Z = np.zeros((len(sigma_range), len(S_range)))
+    for i, sig in enumerate(sigma_range):
+        for j, s in enumerate(S_range):
+            price = black_scholes_price(s, K, T, r, sig, option_type)
+            Z[i, j] = price - premium_paid   
+
+    fig = go.Figure(data=go.Heatmap(
+        x=[f"${s:.0f}" for s in S_range],
+        y=[f"{sig*100:.0f}%" for sig in sigma_range],
+        z=Z,
+        colorscale=[
+            [0.0,  "#7f1d1d"],   
+            [0.45, "#ef4444"], 
+            [0.5,  "#1E293B"],  
+            [0.55, "#4ade80"], 
+            [1.0,  "#14532d"],  
+        ],
+        zmid=0,
+        colorbar=dict(title=dict(
+            text="P&L ($)",
+            font=dict(color=TEXT_COL)
+            ),
+            tickfont=dict(color=TEXT_COL),
+        ),
+        hoverongaps=False,
+        hovertemplate="Spot: %{x}<br>Vol: %{y}<br>P&L: $%{z:.4f}<extra></extra>",
+    ))
+
+    layout = _base_layout(f"P&L Heatmap — {option_type.upper()} | Entry Premium ${premium_paid:.4f}")
+    layout["xaxis"]["title"] = "Spot Price at Analysis"
+    layout["yaxis"]["title"] = "Volatility"
+    layout["height"] = 420
+    fig.update_layout(**layout)
+    return fig

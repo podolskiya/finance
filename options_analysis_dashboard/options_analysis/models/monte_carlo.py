@@ -6,15 +6,15 @@ def monte_carlo_price(S, K, T, r, sigma, simulations=10_000, steps=252, option_t
     Monte Carlo Geometric Brownian Motion.
 
     Parameters:
-        S           : Spot price
-        K           : Strike price
-        T           : Time to expiry (years)
-        r           : Risk-free rate (decimal)
-        sigma       : Volatility (decimal)
-        simulations : Number of price paths
-        steps       : Time steps per path
-        option_type : 'call' or 'put'
-        seed        : Random seed for reproducibility
+        S: Spot price
+        K: Strike price
+        T: Time to expiry (years)
+        r: Risk-free rate (decimal)
+        sigma: Volatility (decimal)
+        simulations: Number of price paths
+        steps: Time steps per path
+        option_type: 'call' or 'put'
+        seed: Random seed for reproducibility
 
     Returns:
         price (float), std_error (float), paths (ndarray for charting)

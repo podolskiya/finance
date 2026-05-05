@@ -1,5 +1,10 @@
 import numpy as np
 import streamlit as st
+import base64
+import pathlib
+import pandas as pd
+
+LOGO_PATH = pathlib.Path(__file__).parent / "assets" / "logo.svg"
 
 from models.black_scholes import black_scholes_price
 from models.binomial_tree import binomial_tree_price
@@ -17,40 +22,66 @@ from utils.plotting import (
 )
 
 st.set_page_config(
-    page_title="Options Pricing Dashboard",
-    page_icon="📊",
+    page_title="AVP — Pricing Dashboard",
+    page_icon=str(LOGO_PATH),  
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+if LOGO_PATH.exists():
+    b64_logo = base64.b64encode(LOGO_PATH.read_bytes()).decode()
+    st.markdown(
+        f'<link rel="icon" type="image/svg+xml" '
+        f'href="data:image/svg+xml;base64,{b64_logo}">',
+        unsafe_allow_html=True,
+    )
+
 st.markdown("""
 <style>
-    /* Main background */
-    .stApp { background-color: #0F172A; color: #CBD5E1; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
-    /* Sidebar */
-    section[data-testid="stSidebar"] { background-color: #1E293B; }
+:root {
+  --bg:        #EDF0F8;
+  --surface:   #FFFFFF;
+  --surface2:  #F4F6FC;
+  --border:    #DDE3F0;
+  --blue:      #4F8EF7;
+  --blue-soft: #EBF2FF;
+  --teal:      #3BBFAD;
+  --navy:      #1A2035;
+  --muted:     #7B8BAD;
+  --red:       #F06B6B;
+  --green:     #3DBF8C;
+  --amber:     #F4A62A;
+  --shadow-sm: 0 1px 4px rgba(26,32,53,0.07);
+  --shadow-md: 0 4px 16px rgba(26,32,53,0.10);
+  --radius:    14px;
+  --radius-sm: 8px;
+}
 
-    /* Metric cards */
-    div[data-testid="metric-container"] {
-        background-color: #1E293B;
-        border: 1px solid #334155;
-        border-radius: 10px;
-        padding: 12px 16px;
-    }
-    div[data-testid="metric-container"] label { color: #94A3B8 !important; }
-    div[data-testid="metric-container"] div  { color: #F1F5F9 !important; }
+html, body, .stApp {
+  background-color: var(--bg) !important;
+  font-family: 'DM Sans', sans-serif !important;
+  color: var(--navy) !important;
+}
 
-    /* Tab styling */
-    button[data-baseweb="tab"] { color: #94A3B8 !important; }
-    button[data-baseweb="tab"][aria-selected="true"] { color: #00C9FF !important; }
+/* ... rest of your CSS rules ... */
 
-    /* Dividers */
-    hr { border-color: #334155; }
+h1 { font-size: 26px !important; font-weight: 700 !important; color: var(--navy) !important; }
+h2, h3 { color: var(--navy) !important; font-weight: 600 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-st.sidebar.title("Parameters")
+if LOGO_PATH.exists():
+    b64 = base64.b64encode(LOGO_PATH.read_bytes()).decode()
+    st.sidebar.markdown(
+        f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+        f'<img src="data:image/svg+xml;base64,{b64}" '
+        f'     style="width:32px;height:32px;border-radius:8px;" />'
+        f'<span style="font-size:20px;font-weight:700;color:#1A2035;">AVP | Options</span>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 st.sidebar.markdown("---")
 
 st.sidebar.subheader("Option Contract")
@@ -212,6 +243,21 @@ with col_res:
 
 st.markdown("---")
 
+greeks_df = pd.DataFrame({
+    "Metric":  ["Delta", "Gamma", "Vega", "Theta", "Rho",
+                "BS Price", "BT Price", "MC Price"],
+    "Value":   [g_delta, g_gamma, g_vega, g_theta, g_rho,
+                bs_price, bt_price, mc_price],
+})
+
+csv_bytes = greeks_df.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="⬇ Download Greeks & Prices as CSV",
+    data=csv_bytes,
+    file_name=f"optioniq_{option_type}_S{S:.0f}_K{K:.0f}.csv",
+    mime="text/csv",
+)
 
 st.subheader("Monte Carlo — Simulated Price Paths")
 st.caption(f"Showing 50 of {mc_sims:,} simulated paths · 95% CI: ${mc_price - 1.96*mc_stderr:.4f} – ${mc_price + 1.96*mc_stderr:.4f}")
@@ -254,7 +300,7 @@ fig_conv.update_layout(
 )
 st.plotly_chart(fig_conv, use_container_width=True)
 
-st.subheader("🌐 Exotic Options")
+st.subheader("Exotic Options")
 col_a, col_b = st.columns(2)
 
 with col_a:

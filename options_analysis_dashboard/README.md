@@ -18,3 +18,36 @@ Cox-Ross-Rubinstein lattice model with configurable step count (def. 200). Suppo
 
 <h3>Monte Carlo0</h3>
 Geometric Brownian Motion simulation with configurable path count (default 10,000). Returns a price estimate, a standard error, and a set of 200 sample paths for visualisation. The 95% confidence interval included.
+
+<img width="1882" height="814" alt="Screenshot 2026-05-05 202211" src="https://github.com/user-attachments/assets/96de65db-3f1f-425f-b16a-d7e12aca7eac" />
+
+<h2>Other Features</h2>
+1) Greeks Dashboard (Delta, Gamma, Vega, Theta, Rho)
+2) Greeks Sensitivity Analysis
+3) 3D Greek Surface
+4) Implied Volatility Solver (function = BS price σ - market price)
+5) Volatility Smile (function = BS price σ - market price)
+6) Exotic Options (function = BS price σ - market price)
+7) Binomial Tree Convergence
+8) Monte Carlo Path Visualisation
+9) Live Market Data (yfinance)
+
+<h2>Getting Started</h2>
+<b>Step 1:</b> Clone the repository 
+git clone https://github.com/your-username/optioniq.git
+cd optioniq
+
+<b>Step 2:</b> Create and activate a virtual environment
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# Mac / Linux
+source venv/bin/activate
+
+<b>Step 3:</b> Install dependencies
+python -m venv venv
+
+<b>Step 4:</b> Run
+streamlit run app.py

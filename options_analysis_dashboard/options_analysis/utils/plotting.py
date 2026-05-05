@@ -3,31 +3,31 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 COLORS = {
-    "bs":   "#00C9FF",
-    "bt":   "#F97316",
-    "mc":   "#A855F7",
-    "delta":"#22C55E",
-    "gamma":"#EAB308",
-    "vega": "#EC4899",
-    "theta":"#F97316",
-    "rho":  "#6366F1",
+    "bs":    "#4F8EF7",   # blue
+    "bt":    "#F4A62A",   # amber
+    "mc":    "#7C5CFC",   # violet
+    "delta": "#3BBFAD",
+    "gamma": "#F4A62A",
+    "vega":  "#7C5CFC",
+    "theta": "#F06B6B",
+    "rho":   "#3DBF8C",
 }
 
-DARK_BG   = "#0F172A"
-PANEL_BG  = "#1E293B"
-GRID_COL  = "#334155"
-TEXT_COL  = "#CBD5E1"
+BG       = "#FFFFFF"
+PAPER    = "#FFFFFF"
+GRID_COL = "#DDE3F0"
+TEXT_COL = "#1A2035"
 
 
 def _base_layout(title=""):
     return dict(
-        title=dict(text=title, font=dict(color=TEXT_COL, size=16)),
-        plot_bgcolor=PANEL_BG,
-        paper_bgcolor=DARK_BG,
-        font=dict(color=TEXT_COL),
-        xaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL),
-        yaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL),
-        legend=dict(bgcolor=DARK_BG, bordercolor=GRID_COL),
+        title=dict(text=title, font=dict(color=TEXT_COL, size=15)),
+        plot_bgcolor=BG,
+        paper_bgcolor=PAPER,
+        font=dict(color=TEXT_COL, family="DM Sans"),
+        xaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL, linecolor=GRID_COL),
+        yaxis=dict(gridcolor=GRID_COL, zerolinecolor=GRID_COL, linecolor=GRID_COL),
+        legend=dict(bgcolor=PAPER, bordercolor=GRID_COL),
         margin=dict(l=50, r=30, t=50, b=50),
     )
 
@@ -111,13 +111,14 @@ def greeks_subplots(x_values, greeks_data, x_label, selected_greeks):
         fig.update_yaxes(gridcolor=GRID_COL, zerolinecolor=GRID_COL, row=row, col=col)
 
     fig.update_layout(
-        plot_bgcolor=PANEL_BG,
-        paper_bgcolor=DARK_BG,
-        font=dict(color=TEXT_COL),
+        plot_bgcolor=BG,
+        paper_bgcolor=PAPER,
+        font=dict(color=TEXT_COL, family="DM Sans"),
         showlegend=False,
         margin=dict(l=50, r=30, t=60, b=50),
         height=280 * rows,
     )
+
     for annotation in fig.layout.annotations:
         annotation.font.color = TEXT_COL
 
@@ -139,15 +140,15 @@ def greek_surface_3d(S_range, T_range, Z_matrix, greek_name):
 
     fig.update_layout(
         scene=dict(
-            xaxis=dict(title="Time to Expiry (yrs)", backgroundcolor=DARK_BG,
-                       gridcolor=GRID_COL, color=TEXT_COL),
-            yaxis=dict(title="Spot Price ($)", backgroundcolor=DARK_BG,
-                       gridcolor=GRID_COL, color=TEXT_COL),
-            zaxis=dict(title=greek_name.capitalize(), backgroundcolor=DARK_BG,
-                       gridcolor=GRID_COL, color=TEXT_COL),
-            bgcolor=DARK_BG,
-        ),
-        paper_bgcolor=DARK_BG,
+                xaxis=dict(title="Time to Expiry (yrs)", backgroundcolor="#F4F6FC",
+                        gridcolor=GRID_COL, color=TEXT_COL),
+                yaxis=dict(title="Spot Price ($)",        backgroundcolor="#F4F6FC",
+                        gridcolor=GRID_COL, color=TEXT_COL),
+                zaxis=dict(title=greek_name.capitalize(), backgroundcolor="#F4F6FC",
+                        gridcolor=GRID_COL, color=TEXT_COL),
+                bgcolor="#F4F6FC",
+            ),
+            paper_bgcolor=PAPER,
         font=dict(color=TEXT_COL),
         title=dict(text=f"{greek_name.capitalize()} Surface", font=dict(color=TEXT_COL, size=16)),
         margin=dict(l=0, r=0, t=50, b=0),

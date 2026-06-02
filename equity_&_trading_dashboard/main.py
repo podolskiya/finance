@@ -39,5 +39,6 @@ print(f"  CONFIDENCE: {verdict['confidence']}")
 print(f"  UPSIDE   : {verdict['upside']}")
 print(f"\n  Reasoning:")
 for r in verdict['reasoning']:
-    print(f"    → {r}")
+    # Using '->' instead of '\u2192' to prevent encoding errors
+    print(f"    -> {r}") 
 print(f"{'='*50}")

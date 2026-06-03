@@ -1,0 +1,7 @@
+# Ignore raw data files from private provider #
+
+data/raw/
+*.csv
+*.dta
+*.sas7bdat
+*.zip

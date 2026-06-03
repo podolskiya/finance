@@ -1,0 +1,5 @@
+# Ignore raw data files and data folders
+data/raw/
+*.csv
+*.dta
+*.sas7bdat

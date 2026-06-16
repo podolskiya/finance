@@ -7,14 +7,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from app.style import metric_card
 
-def get_market_data():
+def get_market_data(indices: dict):
     """Fetch live market indices."""
-    indices = {
-        "S&P 500":  "^GSPC",
-        "NASDAQ":   "^IXIC",
-        "DOW":      "^DJI",
-        "VIX":      "^VIX",
-    }
     results = {}
     for name, ticker in indices.items():
         try:
@@ -75,32 +69,61 @@ def market_chart(tickers: dict, period: str = "6mo") -> go.Figure:
     return fig
 
 def show():
-    # ── Header ──
     now = datetime.now().strftime("%A, %d %B %Y")
-    st.markdown(f"""
-        <div class='page-title'>Market Overview</div>
-        <div class='page-subtitle'>{now} · Live market data</div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<div class='page-subtitle' style='color: #6B7280; font-size: 0.95rem; margin-top: -1rem; margin-bottom: 2rem;'>{now} · Live market data</div>", unsafe_allow_html=True)
+
+    # 2. Section Header
+    st.markdown("<h2 style='margin-bottom: 1rem;'>Market Overview</h2>", unsafe_allow_html=True)
+    # ── Header ──    
+    AVAILABLE_MARKETS = {
+        "S&P 500": "^GSPC",
+        "NASDAQ": "^IXIC",
+        "DOW": "^DJI",
+        "VIX": "^VIX",
+        "Russell 2000": "^RUT",
+        "Crude Oil": "CL=F",
+        "Gold": "GC=F",
+        "Bitcoin": "BTC-USD"
+    }
+
+    default_markets = ["S&P 500", "NASDAQ", "DOW", "VIX"]
+
+    selected_markets = st.multiselect(
+        label="Markets",
+        options=list(AVAILABLE_MARKETS.keys()),
+        default=default_markets,
+        max_selections=4,
+        label_visibility="collapsed"
+    )
+
+    # Fallback to default if the user clears all selections
+    if not selected_markets:
+        selected_markets = default_markets
+        
+    # Build a dictionary of just the selected markets to pass to our data fetcher
+    selected_dict = {market: AVAILABLE_MARKETS[market] for market in selected_markets}
 
     # ── Market Indices Cards ──
     with st.spinner("Fetching live market data..."):
-        market = get_market_data()
+        market = get_market_data(selected_dict)
 
-    cols = st.columns(4)
-    index_tickers = {"S&P 500": "^GSPC", "NASDAQ": "^IXIC",
-                     "DOW": "^DJI", "VIX": "^VIX"}
+    # Create exactly the number of columns needed (1 to 4)
+    cols = st.columns(len(selected_markets))
 
     for col, (name, data) in zip(cols, market.items()):
         chg   = data['change']
         pos   = chg >= 0
         arrow = "▲" if pos else "▼"
         with col:
+            st.markdown("<div class='market-card-trigger'></div>", unsafe_allow_html=True)
+            
             st.markdown(metric_card(
                 label    = name,
                 value    = f"{data['price']:,.2f}",
                 sub      = f"{arrow} {abs(chg):.2f}% today",
                 positive = pos
             ), unsafe_allow_html=True)
+            
             st.plotly_chart(sparkline(data['ticker']), use_container_width=True,
                             config={"displayModeBar": False})
 

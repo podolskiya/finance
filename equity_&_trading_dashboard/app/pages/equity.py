@@ -465,3 +465,204 @@ def show():
         file_name=f"{ticker}_equity_report.csv",
         mime="text/csv"
     )
+
+# ════════════════════════════════════════════════
+    # ── PROPRIETARY ANALYSIS ──
+    # ════════════════════════════════════════════════
+    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+    st.markdown("**🔬 Proprietary Analysis Engine**")
+
+    from equity.proprietary_ratios import compute_all_ratios
+    from equity.ratio_scorer import get_scored_ratios, bqm_scores
+
+    sector = fund['company'].get('Sector', 'Default') or 'Default'
+
+    with st.spinner("Computing proprietary ratios..."):
+        all_r  = compute_all_ratios(ticker)
+        scored = get_scored_ratios(ticker, sector)
+        bqm    = bqm_scores(all_r)
+
+    # ── Business Quality Matrix ──
+    col_bqm, col_quad = st.columns([1.4, 1])
+
+    with col_bqm:
+        st.markdown("<div class='section-card'>", unsafe_allow_html=True)
+
+        # Build the 2×2 quadrant chart
+        fig_bqm = go.Figure()
+
+        # Background quadrants
+        quadrant_config = [
+            (50, 100, 50, 100, "#10B981", "Capital Compounder"),
+            (0,  50,  50, 100, "#F59E0B", "Zombie Business"),
+            (50, 100, 0,  50,  "#3B82F6", "Growth at All Costs"),
+            (0,  50,  0,  50,  "#EF4444", "Value Trap"),
+        ]
+        for x0, x1, y0, y1, color, label in quadrant_config:
+            fig_bqm.add_shape(
+                type="rect",
+                x0=x0, x1=x1, y0=y0, y1=y1,
+                fillcolor=color, opacity=0.08, line_width=0
+            )
+            fig_bqm.add_annotation(
+                x=(x0+x1)/2, y=(y0+y1)/2,
+                text=label,
+                font=dict(size=10, color=color),
+                showarrow=False, opacity=0.5
+            )
+
+        # Axis lines
+        fig_bqm.add_hline(y=50, line_color="#6B7280",
+                           line_dash="dot", line_width=1)
+        fig_bqm.add_vline(x=50, line_color="#6B7280",
+                           line_dash="dot", line_width=1)
+
+        # Company dot
+        fig_bqm.add_trace(go.Scatter(
+            x=[bqm['capital_efficiency']],
+            y=[bqm['earnings_quality']],
+            mode='markers+text',
+            text=[ticker],
+            textposition='top center',
+            textfont=dict(size=12, color='#1A1A1A'),
+            marker=dict(
+                size=18,
+                color=bqm['quadrant_color'],
+                line=dict(color='white', width=2),
+                symbol='star'
+            ),
+            hovertemplate=(
+                f"<b>{ticker}</b><br>"
+                f"Capital Efficiency: {bqm['capital_efficiency']}<br>"
+                f"Earnings Quality: {bqm['earnings_quality']}<br>"
+                f"Quadrant: {bqm['quadrant']}<extra></extra>"
+            )
+        ))
+
+        fig_bqm.update_layout(
+            height=340,
+            title="Business Quality Matrix",
+            xaxis=dict(
+                title="Capital Efficiency →",
+                range=[0, 100], showgrid=False,
+                color='#6B7280'
+            ),
+            yaxis=dict(
+                title="↑ Earnings Quality",
+                range=[0, 100], showgrid=False,
+                color='#6B7280'
+            ),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=0, r=0, t=40, b=0),
+            font=dict(family="Inter, sans-serif"),
+            showlegend=False
+        )
+        st.plotly_chart(fig_bqm, use_container_width=True,
+                        config={"displayModeBar": False})
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    with col_quad:
+        eq  = bqm['earnings_quality']
+        ce  = bqm['capital_efficiency']
+        qc  = bqm['quadrant_color']
+        qn  = bqm['quadrant']
+
+        quadrant_desc = {
+            "Capital Compounder":  "High quality earnings backed by real cash flow, deployed efficiently above cost of capital. Rare and valuable — hold.",
+            "Zombie Business":     "Real profits but capital is deployed below its cost. Management may be hoarding cash or making poor allocation decisions.",
+            "Growth at All Costs": "Capital is working hard but earnings quality is low — growth may be fuelled by aggressive accounting or unsustainable spending.",
+            "Value Trap":          "Low earnings quality and poor capital efficiency. Cheap for a reason — avoid until fundamentals improve.",
+        }
+
+        st.markdown(f"""
+            <div class='section-card'
+                 style='background:{qc}12;
+                        border:2px solid {qc}30;
+                        height:340px;
+                        display:flex; flex-direction:column;
+                        justify-content:center;'>
+                <div style='font-size:0.72rem; color:{qc};
+                            text-transform:uppercase;
+                            letter-spacing:0.06em; font-weight:600;'>
+                    Business Quality Quadrant
+                </div>
+                <div style='font-size:1.6rem; font-weight:800;
+                            color:{qc}; margin:0.5rem 0;'>
+                    {qn}
+                </div>
+                <div style='font-size:0.85rem; color:#374151;
+                            line-height:1.6; margin-bottom:1.2rem;'>
+                    {quadrant_desc.get(qn, '')}
+                </div>
+                <hr style='border-color:{qc}20; margin:0.5rem 0;'>
+                <div style='display:flex; gap:1.5rem; margin-top:0.5rem;'>
+                    <div>
+                        <div style='font-size:0.72rem; color:{qc};'>
+                            Earnings Quality
+                        </div>
+                        <div style='font-size:1.4rem; font-weight:700;
+                                    color:{qc};'>{eq:.0f}/100</div>
+                    </div>
+                    <div>
+                        <div style='font-size:0.72rem; color:{qc};'>
+                            Capital Efficiency
+                        </div>
+                        <div style='font-size:1.4rem; font-weight:700;
+                                    color:{qc};'>{ce:.0f}/100</div>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # ── 2 Green / 2 Neutral / 2 Red Ratio Cards ──
+    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style='font-size:0.85rem; color:#6B7280; margin-bottom:1rem;'>
+            Industry-calibrated ratios for
+            <b style='color:#1A1A1A;'>{sector}</b> ·
+            Ranked by relative strength within sector peers
+        </div>
+    """, unsafe_allow_html=True)
+
+    bucket_config = [
+        ("green",   "✅ Strengths",  "#10B981", "#D1FAE5", "#065F46"),
+        ("neutral", "⚠️ Watch",      "#F59E0B", "#FEF3C7", "#92400E"),
+        ("red",     "❌ Concerns",   "#EF4444", "#FEE2E2", "#991B1B"),
+    ]
+
+    cols = st.columns(3)
+    for col, (bucket, label, color, bg, fg) in zip(cols, bucket_config):
+        ratios = scored[bucket]
+        with col:
+            st.markdown(f"""
+                <div style='font-size:0.8rem; font-weight:700;
+                            color:{fg}; margin-bottom:0.6rem;
+                            padding:0.3rem 0.8rem;
+                            background:{bg}; border-radius:20px;
+                            display:inline-block;'>
+                    {label}
+                </div>
+            """, unsafe_allow_html=True)
+
+            for r in ratios:
+                st.markdown(f"""
+                    <div class='metric-card'
+                         style='border-left:4px solid {color};
+                                margin-bottom:0.8rem;'>
+                        <div class='label'>{r['name']}</div>
+                        <div class='value'
+                             style='color:{color};
+                                    font-size:1.4rem;'>
+                            {r['display']}
+                        </div>
+                        <div style='font-size:0.78rem; color:#374151;
+                                    margin-top:0.4rem; line-height:1.5;'>
+                            {r['desc']}
+                        </div>
+                        <div style='font-size:0.72rem; color:#6B7280;
+                                    margin-top:0.3rem; font-style:italic;'>
+                            💡 {r['pitfall']}
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)

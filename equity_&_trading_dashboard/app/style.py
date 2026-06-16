@@ -30,6 +30,44 @@ THEME_CSS = """
         margin-top: -5px;
     }
 
+    h1 a, h2 a, h3 a, h4 a, h5 a, h6 a,
+    .stMarkdown a.header-anchor,
+    a.header-anchor,
+    svg[title="Copy link to clipboard"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    /* ── Combined Card & Chart Styling ── */
+    
+    /* 1. Move the border/radius to the Streamlit column itself */
+    div[data-testid="stColumn"]:has(.market-card-trigger) {
+        background: #FFFFFF !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+        border: 1px solid #E5E7EB !important;
+        overflow: hidden !important; /* Clips the bottom corners of the chart */
+    }
+
+    /* 2. Strip the original border and bottom padding from the inner text card */
+    div[data-testid="stColumn"]:has(.market-card-trigger) .metric-card {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        padding-bottom: 0.5rem !important; /* <-- CHANGED: Gave the text breathing room */
+    }
+
+    /* 3. Remove Streamlit's default vertical gaps inside these specific columns */
+    div[data-testid="stColumn"]:has(.market-card-trigger) > div[data-testid="stVerticalBlock"] {
+        gap: 0 !important;
+    }
+
+    /* 4. Pull the Plotly chart down to hide Streamlit's iframe padding */
+    div[data-testid="stColumn"]:has(.market-card-trigger) [data-testid="stPlotlyChart"] {
+        margin-top: 0.5rem !important; /* <-- CHANGED: Pushes the top of the chart down away from text */
+        margin-bottom: -1.2rem !important; /* Keeps the bottom flush */
+    }
     /* ── Top Navbar Popover Triggers (The main menu links) ── */
     [data-testid="stPopover"] > button {
         background: transparent !important;

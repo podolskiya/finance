@@ -34,7 +34,7 @@ Geometric Brownian Motion simulation with configurable path count (default 10,00
 
 <h2>Getting Started</h2>
 <b>Step 1:</b> Clone the repository 
-git clone https://github.com/your-username/optioniq.git
+git clone [https://github.com/podolskiya/finance/tree/main/options_analysis_dashboard/options_analysis]
 cd optioniq
 
 <b>Step 2:</b> Create and activate a virtual environment

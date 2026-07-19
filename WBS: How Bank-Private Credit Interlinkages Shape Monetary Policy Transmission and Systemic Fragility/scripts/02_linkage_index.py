@@ -303,7 +303,8 @@ def main():
         "",
     ]
 
-    bank_avg2 = df.groupby("rssd9001").agg(mean_Lit=("L_it", "mean"), mean_assets=("rcfd2170", "mean")).reset_index()
+    bank_avg2 = df.groupby("rssd9001").agg(mean_Lit=("L_it", "mean"),
+                                            mean_assets=("rcfd2170", "mean")).reset_index()
     corr = bank_avg2[["mean_Lit", "mean_assets"]].corr().iloc[0, 1]
     n = len(bank_avg2)
     top10pct = max(1, int(n * 0.10))

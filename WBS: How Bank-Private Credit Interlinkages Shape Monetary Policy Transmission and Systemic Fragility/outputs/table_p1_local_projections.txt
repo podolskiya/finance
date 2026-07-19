@@ -1,0 +1,51 @@
+TABLE: P1 Local Projections -- delta_h coefficient on (shock x linkage)
+Outcome: Delta_h y_it = log(CI_{i,t+h}) - log(CI_{i,t-1})
+Sample: FFIEC 031 banks | Horizons h = 0..8 quarters
+
+h      A: contemp L_it  B: contemp,no-t.FE     C: lagged L  D: bank-mean L
+--------------------------------------------------------------------------
+0              -0.0493         -0.0445         -0.0477         -0.0796
+1              +0.0952         +0.1001         +0.0879         +0.0822
+2              -0.1579         -0.1494         -0.1688         -0.0446
+3              -0.0357         -0.0409         -0.0541         +0.0627
+4             -0.0015†        +0.0386†        -0.0210†         +0.0965
+5              +0.0139         +0.0528        -0.0110†         +0.2050
+6              +0.0726         +0.1508         +0.0339         +0.2779
+7              +0.1843         +0.2875         +0.1390        +0.4585*
+8              +0.1037         +0.2402         +0.0725       +0.5384**
+--------------------------------------------------------------------------
+
+N by horizon (Model A / B / C / D):
+  h=0: 6548 / 6548 / 6548 / 6548
+  h=1: 6274 / 6274 / 6274 / 6274
+  h=2: 6078 / 6078 / 6078 / 6078
+  h=3: 5940 / 5940 / 5940 / 5940
+  h=4: 5779 / 5779 / 5779 / 5779
+  h=5: 5619 / 5619 / 5619 / 5619
+  h=6: 5465 / 5465 / 5465 / 5465
+  h=7: 5322 / 5322 / 5322 / 5322
+  h=8: 5188 / 5188 / 5188 / 5188
+
+--------------------------------------------------------------------------
+
+† Two-way (bank, quarter) clustered SE was degenerate (NaN) at this horizon;
+  one-way (bank) clustered SE reported instead. See p1_regression_log.txt for
+  cluster counts. Coefficient (point estimate) is unaffected either way.
+
+Notes: Coefficient shown is delta_h, on (mp_shock_t x linkage variable). Two-way
+clustered SEs (bank, quarter) unless noted. *** p<0.01  ** p<0.05  * p<0.10.
+Model A (PRIMARY): bank + quarter FE, contemporaneous L_it. mp_shock_t is
+  absorbed by quarter FE; delta_h is the only estimable parameter of interest.
+Model B (robustness): bank FE only, + nfci/term_spread, contemporaneous L_it.
+  Literal proposal-spec check; both beta_h and delta_h estimable, weaker ID.
+Model C (robustness): bank + quarter FE, L_{i,t-1} instead of contemporaneous
+  L_it -- avoids simultaneity between the shock and the linkage measure within
+  the same quarter (Kashyap-Stein 1995, Kishan-Opiela 2000).
+Model D (robustness): bank + quarter FE, time-averaged L_it ("linkage type")
+  instead of the noisy quarterly flow measure -- avoids attenuation from
+  quarter-to-quarter measurement noise (L_it has a large mass at exactly zero).
+mp_shock is a quarterly SUM of the Jarocinski-Karadi monthly MP_pm shock --
+  identifies the effect of the quarterly-cumulated shock, not a single FOMC
+  announcement (frequency-mismatch limitation, see 03_macro_merge.py).
+Because the outcome is cumulative from t-1, delta_h at h=8 IS the cumulative
+  eight-quarter effect (no further summation needed).

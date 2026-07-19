@@ -1,0 +1,16 @@
+CONCENTRATION DIAGNOSTIC
+Checks whether NBFI-linkage exposure is dominated by a small
+number of very large banks (supervisor comment).
+============================================================
+
+Average share of aggregate NBFI-linkage dollar exposure held by:
+  Top 5 banks (of ~87):  74.4%  (range 66.2-85.3%)
+  Top 10 banks:                91.3%  (range 87.3-95.1%)
+  Top 20 banks:                97.7%  (range 96.7-98.9%)
+  Mean HHI (dollar exposure):  0.1316  (uniform benchmark = 0.0115)
+
+Correlation (bank-level mean L_it, bank-level mean assets): 0.121
+  -> ratio NOT strongly concentrated in largest banks despite dollar concentration above
+
+N banks: 194. Top 10% by assets (19 banks): mean L_it = 0.2978
+Bottom 90% by assets (175 banks): mean L_it = 0.0584

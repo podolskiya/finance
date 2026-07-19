@@ -1,0 +1,91 @@
+P1 LOCAL PROJECTIONS AUDIT LOG
+=================================================================
+Horizons: h = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+Model A (primary): bank + quarter FE, contemporaneous L_it, two-way clustered SE
+Model B (robustness): bank FE only + nfci/term_spread, contemporaneous L_it, two-way clustered SE
+Model C (robustness): bank + quarter FE, L_{i,t-1} (lagged linkage, avoids simultaneity)
+Model D (robustness): bank + quarter FE, time-averaged L_it ("linkage type", avoids flow-measure noise)
+Model E (extension): bank + quarter FE, stress-dependent triple interaction (shock x L_it x high_stress, NFCI top tercile)
+
+High-stress threshold (NFCI >= top-tercile value -0.3725): 29 of 85 quarters flagged
+Linkage-type terciles: Low<=0.0079, Medium<=0.0347, High>0.0347; bank counts: {'Low': 65, 'High': 65, 'Medium': 64}
+L_it_lag1 valid obs: 7,038 of 7,367
+  h=0: 6,553 valid outcome observations (of 7,367)
+  h=1: 6,274 valid outcome observations (of 7,367)
+  h=2: 6,086 valid outcome observations (of 7,367)
+  h=3: 5,945 valid outcome observations (of 7,367)
+  h=4: 5,783 valid outcome observations (of 7,367)
+  h=5: 5,626 valid outcome observations (of 7,367)
+  h=6: 5,471 valid outcome observations (of 7,367)
+  h=7: 5,326 valid outcome observations (of 7,367)
+  h=8: 5,190 valid outcome observations (of 7,367)
+  h=0: dropped 5 singleton obs before Model A (bank/quarter FE)
+  h=0: dropped 5 singleton obs before Model C
+  h=0: dropped 5 singleton obs before Model D
+  h=0: dropped 5 singleton obs before Model E
+  h=2: dropped 8 singleton obs before Model A (bank/quarter FE)
+  h=2: dropped 8 singleton obs before Model C
+  h=2: dropped 8 singleton obs before Model D
+  h=2: dropped 8 singleton obs before Model E
+  h=3: dropped 5 singleton obs before Model A (bank/quarter FE)
+  h=3: dropped 5 singleton obs before Model C
+  h=3: dropped 5 singleton obs before Model D
+  h=3: dropped 5 singleton obs before Model E
+  h=4: dropped 4 singleton obs before Model A (bank/quarter FE)
+  h=4: dropped 4 singleton obs before Model C
+  h=4: dropped 4 singleton obs before Model D
+  h=4: dropped 4 singleton obs before Model E
+  h=4 Model A: FALLBACK: one-way (bank) clustered SE used -- two-way clustered covariance was NaN at this horizon (n_bank_clusters=157, n_time_clusters=80)
+  h=4 Model B: FALLBACK: one-way (bank) clustered SE used -- two-way clustered covariance was deflated (two-way SE=0.0157 is <20% of one-way SE=0.1363 -- likely degenerate covariance, not genuine precision) at this horizon (n_bank_clusters=157, n_time_clusters=80)
+  h=4 Model C: FALLBACK: one-way (bank) clustered SE used -- two-way clustered covariance was NaN at this horizon (n_bank_clusters=157, n_time_clusters=80)
+  h=5: dropped 7 singleton obs before Model A (bank/quarter FE)
+  h=5: dropped 7 singleton obs before Model C
+  h=5: dropped 7 singleton obs before Model D
+  h=5: dropped 7 singleton obs before Model E
+  h=5 Model C: FALLBACK: one-way (bank) clustered SE used -- two-way clustered covariance was NaN at this horizon (n_bank_clusters=150, n_time_clusters=79)
+  h=6: dropped 6 singleton obs before Model A (bank/quarter FE)
+  h=6: dropped 6 singleton obs before Model C
+  h=6: dropped 6 singleton obs before Model D
+  h=6: dropped 6 singleton obs before Model E
+  h=7: dropped 4 singleton obs before Model A (bank/quarter FE)
+  h=7: dropped 4 singleton obs before Model C
+  h=7: dropped 4 singleton obs before Model D
+  h=7: dropped 4 singleton obs before Model E
+  h=8: dropped 2 singleton obs before Model A (bank/quarter FE)
+  h=8: dropped 2 singleton obs before Model C
+  h=8: dropped 2 singleton obs before Model D
+  h=8: dropped 2 singleton obs before Model E
+
+PEAK EFFECT / TIME-TO-PEAK / CUMULATIVE EFFECT (Model A (primary))
+  Peak |delta_h|: h=7, delta_7=+0.1843
+  Cumulative 8-quarter effect: delta_8=+0.1037
+
+PEAK EFFECT / TIME-TO-PEAK / CUMULATIVE EFFECT (Model B)
+  Peak |delta_h|: h=7, delta_7=+0.2875
+  Cumulative 8-quarter effect: delta_8=+0.2402
+
+PEAK EFFECT / TIME-TO-PEAK / CUMULATIVE EFFECT (Model C (lagged L))
+  Peak |delta_h|: h=2, delta_2=-0.1688
+  Cumulative 8-quarter effect: delta_8=+0.0725
+
+PEAK EFFECT / TIME-TO-PEAK / CUMULATIVE EFFECT (Model D (bank-mean L))
+  Peak |delta_h|: h=8, delta_8=+0.5384
+  Cumulative 8-quarter effect: delta_8=+0.5384
+  h=0 group=Low: dropped 1 singleton obs before Model F
+  h=0 group=Medium: dropped 3 singleton obs before Model F
+  h=0 group=High: dropped 1 singleton obs before Model F
+  h=2 group=Low: dropped 1 singleton obs before Model F
+  h=2 group=Medium: dropped 5 singleton obs before Model F
+  h=2 group=High: dropped 2 singleton obs before Model F
+  h=3 group=Low: dropped 1 singleton obs before Model F
+  h=3 group=Medium: dropped 4 singleton obs before Model F
+  h=4 group=Low: dropped 2 singleton obs before Model F
+  h=4 group=High: dropped 2 singleton obs before Model F
+  h=5 group=Medium: dropped 6 singleton obs before Model F
+  h=5 group=High: dropped 1 singleton obs before Model F
+  h=6 group=Low: dropped 3 singleton obs before Model F
+  h=6 group=Medium: dropped 2 singleton obs before Model F
+  h=6 group=High: dropped 1 singleton obs before Model F
+  h=7 group=Medium: dropped 4 singleton obs before Model F
+  h=8 group=Low: dropped 1 singleton obs before Model F
+  h=8 group=High: dropped 1 singleton obs before Model F

@@ -1,0 +1,41 @@
+DATA CLEANING AUDIT LOG
+=================================================================
+Step                                                             rows  banks
+-----------------------------------------------------------------
+  rcfd1.csv: dropped 11,369 exact-duplicate rows (WRDS export artifact)
+  rcfd2.csv: dropped 11,346 exact-duplicate rows (WRDS export artifact)
+  Dropped 127 (bank,quarter) keys with conflicting (non-identical) duplicate rows in either file -- likely amended/restated filings; no submission-date field available to pick the correct version. See script docstring.
+2. Merged rcfd1 + rcfd2 (inner join on bank,quarter)         rows= 532,466  banks=9,680
+RCONJ454: 138 conflicting keys set to NaN
+RCONJ454 merged: 370,341 of 532,466 rows matched
+3. Trim to analysis window (2004-10-01 to 2025-12-31)        rows= 532,466  banks=9,680
+
+Filing type distribution (pre-filter):
+  Type  41:    395,735 rows
+  Type  51:    128,901 rows
+  Type  31:      7,830 rows
+5. Keep FFIEC 031 filers only                                rows=   7,830  banks=  205
+  NOTE: 2005Q3 has a known WRDS extraction gap (76 banks vs 119/125 in surrounding quarters) -- confirmed pull artifact (banks present in both Q2 and Q4 but absent in Q3), not real attrition. Left as a natural panel gap, not patched.
+6. Assets >= $300m (300,000k)                                rows=   7,417  banks=  194
+7. Drop missing rcfd2170 (removed 0)                         rows=   7,417  banks=  194
+  Merger quarters flagged and dropped: 50
+8. Drop merger quarters                                      rows=   7,367  banks=  194
+  rcfd3820: 672 NaN -> 0 (RC-L zero-fill)
+  rcfdj457: 2,288 NaN -> 0 (RC-L zero-fill)
+  rcfdj458: 2,628 NaN -> 0 (RC-L zero-fill)
+  rcfdj459: 2,288 NaN -> 0 (RC-L zero-fill)
+  rconj454: 2,288 NaN -> 0 (RC-L zero-fill)
+10. Final clean panel                                        rows=   7,367  banks=  194
+
+-----------------------------------------------------------------
+FINAL VARIABLE COVERAGE:
+
+  rcfd3819             100.0%  (7,367 / 7,367)
+  rcfd3433             100.0%  (7,367 / 7,367)
+  rcfdj458             100.0%  (7,367 / 7,367)
+  rconj454             100.0%  (7,367 / 7,367)
+  rcfd2170             100.0%  (7,367 / 7,367)
+  rcfd3210             100.0%  (7,367 / 7,367)
+  rcfd1763             100.0%  (7,367 / 7,367)
+  rcfd1764             100.0%  (7,367 / 7,367)
+  rcfdj454               4.6%  (340 / 7,367)

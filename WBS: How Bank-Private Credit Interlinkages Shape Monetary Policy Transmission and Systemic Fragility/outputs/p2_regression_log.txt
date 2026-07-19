@@ -1,0 +1,26 @@
+P2 QUANTILE REGRESSION AUDIT LOG
+=================================================================
+Outcome: credit_growth_4q
+Quantiles: [0.1, 0.25, 0.5, 0.75, 0.9]
+Bootstrap: B=500, seed=42, cluster=rssd9001 (bank)
+
+Estimation sample: 6,043 rows | 166 banks
+Rows dropped from full panel (7,367): 1,324
+
+
+HYPOTHESIS TEST RESULTS
+-----------------------------------------------------------------
+beta_L_it(tau=0.10) = -0.198162  SE=0.044365  p=0.0000***
+beta_L_it(tau=0.50) = -0.018320
+beta_L_it(tau=0.90) = +0.139410
+
+H0(FRAGILITY):  |beta(0.10)|=0.1982 vs |beta(0.50)|=0.0183  -> REJECT (tail amplification present)
+H0(ASYMMETRY):  beta(0.10)=-0.1982 vs beta(0.90)=+0.1394  -> REJECT (asymmetric/fragility)
+H0(REDUNDANCY): beta_L_it(tau=0.10) p=0.0000  -> REJECT at 10% level
+
+1SD increase in L_it (0.4152 units):
+  tau=0.10: -0.0823 log pts
+  tau=0.50: -0.0076 log pts
+  tau=0.90: +0.0579 log pts
+
+Runtime: 166.8 seconds
